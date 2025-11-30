@@ -23,36 +23,35 @@ interface CardFrontProps {
 export const CardFront: React.FC<CardFrontProps> = ({ card, isReversed }) => {
     const Icon = card.icon;
     
-    // Clean, Apple-esque color palette
     const getTheme = (element: string) => {
         switch(element) {
             case 'Fire': return { 
                 icon: 'text-rose-500', 
-                bg: 'bg-rose-50/30',
+                bg: 'bg-rose-50/80', 
                 border: 'border-rose-100',
                 accent: 'bg-rose-400'
             };
             case 'Water': return { 
                 icon: 'text-sky-500', 
-                bg: 'bg-sky-50/30',
+                bg: 'bg-sky-50/80',
                 border: 'border-sky-100',
                 accent: 'bg-sky-400'
             };
             case 'Air': return { 
                 icon: 'text-slate-500', 
-                bg: 'bg-slate-50/30',
+                bg: 'bg-slate-50/80',
                 border: 'border-slate-100',
                 accent: 'bg-slate-400'
             };
             case 'Earth': return { 
                 icon: 'text-emerald-500', 
-                bg: 'bg-emerald-50/30',
+                bg: 'bg-emerald-50/80',
                 border: 'border-emerald-100',
                 accent: 'bg-emerald-400'
             };
             default: return { 
                 icon: 'text-violet-500', 
-                bg: 'bg-violet-50/30',
+                bg: 'bg-violet-50/80',
                 border: 'border-violet-100',
                 accent: 'bg-violet-400'
             };
@@ -62,9 +61,12 @@ export const CardFront: React.FC<CardFrontProps> = ({ card, isReversed }) => {
     const theme = getTheme(card.element);
 
     return (
-        <div className={`w-full h-full rounded-xl relative overflow-hidden bg-white shadow-sm border-[0.5px] ${theme.border}`}>
-            {/* Subtle background texture */}
+        <div className={`w-full h-full rounded-xl relative overflow-hidden shadow-sm border-[0.5px] ${theme.border}`}>
+            {/* Explicit solid background layer to prevent transparency issues, instead of bg-white on wrapper */}
+            <div className="absolute inset-0 bg-white"></div>
+            {/* Tint Layer */}
             <div className={`absolute inset-0 ${theme.bg}`}></div>
+            {/* Texture Layer */}
             <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
 
             {/* Rotatable Content Container */}
@@ -84,7 +86,7 @@ export const CardFront: React.FC<CardFrontProps> = ({ card, isReversed }) => {
                     />
                 </div>
 
-                {/* Orientation Indicator (Dot at the bottom when upright) */}
+                {/* Orientation Indicator */}
                 <div className={`absolute bottom-4 w-1 h-1 rounded-full ${theme.accent} opacity-30`}></div>
             </div>
         </div>

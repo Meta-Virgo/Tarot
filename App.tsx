@@ -27,7 +27,7 @@ const AmbientMagicCircle = ({ active }: { active: boolean }) => {
     );
 };
 
-// --- Advanced Mystic Magic Circle (Sakura Style - Complex) ---
+// --- Celestial Clockwork Magic Circle (v4.0) ---
 const SakuraMagicCircle = () => {
     return (
         <div className="relative w-80 h-80 md:w-[450px] md:h-[450px] flex items-center justify-center pointer-events-none select-none">
@@ -287,11 +287,18 @@ export default function TarotApp() {
                     onClick={() => handleCardInteraction(index)} 
                     className={`
                         relative cursor-pointer perspective-1000 transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) ${cardClass}
+                        
                         ${isActive 
-                            ? 'z-30 scale-105 md:scale-110 shadow-2xl' 
+                            ? 'z-30 scale-105 md:scale-110' 
                             : ''
                         }
-                        ${!isActive && revealed && !isAnyActive ? 'hover:scale-105 hover:shadow-xl' : ''}
+                        /* REMOVE CONTAINER SHADOW IF REVEALED TO PREVENT WHITE BOX ARTIFACT */
+                        ${isActive && !revealed ? 'shadow-2xl' : ''}
+                        
+                        /* FORCE TRANSPARENT BG ON CONTAINER */
+                        bg-transparent
+                        
+                        ${!isActive && revealed && !isAnyActive ? 'hover:scale-105' : ''}
                         ${!isActive && !revealed ? 'hover:-translate-y-3 hover:shadow-2xl hover:shadow-indigo-100 active:scale-95' : ''}
                         ${!isActive && isAnyActive ? 'opacity-50 scale-95 blur-[0.5px] grayscale-[0.5]' : ''}
                     `}
