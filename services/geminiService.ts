@@ -62,12 +62,18 @@ async function generateContentWithRetry(modelName: string, params: any, maxRetri
         } catch (error: any) {
             attempt++;
             
+            const errorMessage = error.message || error.toString();
+
             // Check for specific error codes that are not retriable
-            if (error.message?.includes("429") || error.message?.includes("RESOURCE_EXHAUSTED")) {
+            if (errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
                 throw new Error("QUOTA_EXCEEDED");
             }
-            if (error.message?.includes("API Key") || error.message?.includes("API_KEY")) {
+            if (errorMessage.includes("API Key") || errorMessage.includes("API_KEY")) {
                 throw new Error("API_KEY_INVALID");
+            }
+            // Check for Location/Geo-blocking error
+            if (errorMessage.includes("User location is not supported") || errorMessage.includes("FAILED_PRECONDITION")) {
+                throw new Error("LOCATION_NOT_SUPPORTED");
             }
 
             // If max retries reached, throw the last error
@@ -124,6 +130,9 @@ export const getTarotReading = async (
     }
     if (error.message === "QUOTA_EXCEEDED") {
         return "宇宙能量通道拥堵（API 配额已耗尽）。请更换新的 Google Gemini API Key。";
+    }
+    if (error.message === "LOCATION_NOT_SUPPORTED") {
+        return "🚫 所在的星域受到干扰（地区不支持）。Google Gemini 服务在当前网络地区不可用，请尝试开启全球网络代理（VPN）后重试。";
     }
     
     return "连接宇宙能量时遇到干扰，请稍后再试。";

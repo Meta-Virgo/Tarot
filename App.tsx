@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
     Sparkles, Mic, MicOff, Volume2, StopCircle,
-    ArrowRight, Loader2, Minimize2, Info
+    ArrowRight, Loader2, Minimize2, Info, Eye
 } from 'lucide-react';
 import { SPREADS, DECKS } from './constants';
 import { CardInstance, Spread, GameState } from './types';
@@ -9,8 +9,39 @@ import { CardBack, CardFront } from './components/Card';
 import { getTarotReading, getSpeechFromText } from './services/geminiService';
 import { pcmToWav } from './utils';
 
+// --- Mystic Circle Loader (Elegant, Minimalist, Text-free) ---
+const MysticCircleLoader = () => {
+    return (
+        <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
+            {/* Core Glow */}
+            <div className="absolute inset-0 bg-indigo-500/5 rounded-full blur-[60px] animate-pulse-slow"></div>
+
+            {/* Layer 1: Outer Runes Ring - Ultra Slow Clockwise */}
+            <svg className="absolute w-full h-full animate-spin-ultra-slow text-indigo-200/50" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="98" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 6" strokeLinecap="round" />
+                <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="0.2" />
+            </svg>
+
+            {/* Layer 2: Geometric Star - Slow Counter-Clockwise */}
+            <svg className="absolute w-[70%] h-[70%] animate-spin-reverse-slow text-violet-300/40 drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.3"/>
+                {/* 8-pointed star geometry */}
+                <path d="M50 2 L61 35 L98 35 L68 57 L79 91 L50 70 L21 91 L32 57 L2 35 L39 35 Z" fill="none" stroke="currentColor" strokeWidth="0.6"/>
+            </svg>
+
+            {/* Layer 3: Inner Sacred Geometry - Breathing */}
+            <div className="absolute w-[35%] h-[35%] animate-pulse-slow opacity-60">
+                <div className="absolute inset-0 border border-indigo-400/40 rotate-45 transform transition-transform duration-[10s]"></div>
+                <div className="absolute inset-0 border border-indigo-400/40 rotate-0"></div>
+            </div>
+
+            {/* Center Core Light - The 'Eye' */}
+            <div className="absolute w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_20px_2px_rgba(255,255,255,0.9)] animate-pulse-glow"></div>
+        </div>
+    );
+};
+
 export default function TarotApp() {
-    // --- State ---
     const [gameState, setGameState] = useState<GameState>('intro');
     const [selectedSpread, setSelectedSpread] = useState<Spread>(SPREADS[1]);
     const [deck, setDeck] = useState<CardInstance[]>([]);
@@ -37,8 +68,6 @@ export default function TarotApp() {
     // UI Helpers
     const [isMobile, setIsMobile] = useState(false);
 
-    // --- Effects ---
-
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
@@ -49,13 +78,14 @@ export default function TarotApp() {
     // Shuffle Logic
     useEffect(() => {
         if (gameState === 'shuffling') {
-            // Reset state
+            // Reset reading state specifically for new game round
             setAiReading(''); 
             setAudioUrl(null); 
             setIsPlayingAudio(false); 
             setSelectedCards([]); 
             setRevealedCards(new Array(selectedSpread.cardCount).fill(false)); 
             setCurrentReading(null);
+            setShowAiModal(false);
             
             // Choose deck
             const sourceDeck = useFullDeck ? DECKS.full : DECKS.majors;
@@ -76,7 +106,20 @@ export default function TarotApp() {
         }
     }, [gameState, useFullDeck, selectedSpread.cardCount]);
 
-    // --- Handlers ---
+    // Completely reset the game to initial state
+    const resetFullGame = () => {
+        setGameState('intro');
+        setUserQuestion('');
+        setAiReading('');
+        setAudioUrl(null);
+        setIsPlayingAudio(false);
+        setSelectedCards([]);
+        setRevealedCards([]);
+        setCurrentReading(null);
+        setShowAiModal(false);
+        setDeck([]);
+        setIsAiLoading(false);
+    };
 
     const handleCardPick = (index: number) => {
         if (selectedCards.length >= selectedSpread.cardCount) return;
@@ -94,14 +137,11 @@ export default function TarotApp() {
     };
 
     const handleCardInteraction = (index: number) => {
-        // If not revealed, reveal it
         if (!revealedCards[index]) {
             const newRevealed = [...revealedCards];
             newRevealed[index] = true;
             setRevealedCards(newRevealed);
         }
-        
-        // Always set as current reading (focus) when clicked, even if already revealed
         setCurrentReading(index);
     };
 
@@ -133,9 +173,16 @@ export default function TarotApp() {
         recognition.onerror = () => setIsListening(false);
     };
 
-    const handleGenerateReading = async () => {
-        if (isAiLoading) return;
+    const handleActionClick = async () => {
+        // 1. If we already have a reading, just show it (Persistence)
+        if (aiReading) {
+            setShowAiModal(true);
+            return;
+        }
 
+        // 2. Otherwise generate new
+        if (isAiLoading) return;
+        
         setIsAiLoading(true);
         setShowAiModal(true);
         
@@ -156,7 +203,7 @@ export default function TarotApp() {
             }
         } catch (e) {
             console.error(e);
-            setAiReading("连接中断");
+            setAiReading("连接中断，请重试");
         } finally {
             setIsAiLoading(false);
         }
@@ -172,15 +219,12 @@ export default function TarotApp() {
         setIsPlayingAudio(!isPlayingAudio);
     };
 
-    // --- Render Helpers ---
-
     const renderCardInLayout = (index: number) => {
         const card = selectedCards[index];
         const revealed = revealedCards[index];
         const position = selectedSpread.positions[index];
         const isDiamond = selectedSpread.layout === 'diamond';
         
-        // Grid area for diamond layout
         const gridArea = isDiamond ? ['center', 'left', 'right', 'bottom', 'top'][index] : undefined;
 
         const cardClass = isDiamond 
@@ -220,8 +264,6 @@ export default function TarotApp() {
         );
     };
 
-    // --- Main Render ---
-
     return (
         <div className="min-h-screen bg-[#f3f4f8] text-slate-800 font-sans selection:bg-indigo-100 selection:text-indigo-900 flex flex-col items-center relative overflow-hidden">
             {/* Background */}
@@ -232,9 +274,9 @@ export default function TarotApp() {
 
             <audio ref={audioRef} src={audioUrl || undefined} onEnded={() => setIsPlayingAudio(false)} className="hidden" />
             
-            {/* Header */}
+            {/* Header - Resets Full Game on click */}
             <header className="absolute top-0 w-full p-6 md:p-8 flex justify-center z-20">
-                <div className="flex flex-col items-center group cursor-pointer" onClick={() => gameState !== 'intro' && setGameState('intro')}>
+                <div className="flex flex-col items-center group cursor-pointer" onClick={() => gameState !== 'intro' && resetFullGame()}>
                     <h1 className="text-lg md:text-xl font-serif text-slate-700 tracking-[0.3em] font-light">ORACLE</h1>
                     <div className="w-0 group-hover:w-full h-[1px] bg-indigo-300 mt-2 transition-all duration-500"></div>
                 </div>
@@ -242,7 +284,6 @@ export default function TarotApp() {
 
             <main className="flex-1 w-full max-w-6xl p-4 md:p-6 z-10 flex flex-col items-center justify-center min-h-[100vh] md:min-h-[600px]">
                 
-                {/* Intro View */}
                 {gameState === 'intro' && (
                     <div className="flex flex-col items-center animate-fade-in w-full max-w-lg mt-10 md:mt-0 gap-8">
                         <div className="flex flex-col items-center gap-6 cursor-pointer group" onClick={() => setGameState('spread_select')}>
@@ -252,7 +293,6 @@ export default function TarotApp() {
                             <p className="text-[10px] font-serif text-slate-400 tracking-[0.4em] uppercase opacity-0 group-hover:opacity-100 transition-all duration-700 transform translate-y-2 group-hover:translate-y-0">Begin Journey</p>
                         </div>
                         
-                        {/* Question Input */}
                         <div className="w-full relative group transition-all duration-300 focus-within:scale-[1.01] px-4">
                             <div className="absolute inset-0 bg-gradient-to-r from-indigo-100 to-white rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
                             <div className="relative bg-white border border-white rounded-full px-4 py-3 md:px-6 md:py-4 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.05)] flex items-center gap-3 md:gap-4 transition-all duration-300 focus-within:shadow-[0_12px_40px_-6px_rgba(99,102,241,0.15)] focus-within:border-indigo-50">
@@ -272,7 +312,6 @@ export default function TarotApp() {
                             </div>
                         </div>
 
-                        {/* Deck Switch */}
                         <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-full border border-white/60 shadow-sm backdrop-blur-sm">
                             <button onClick={() => setUseFullDeck(!useFullDeck)} className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-300 ${useFullDeck ? 'bg-indigo-400' : 'bg-slate-300'}`}>
                                 <div className={`w-4 h-4 bg-white rounded-full shadow-sm transform transition-transform duration-300 ${useFullDeck ? 'translate-x-4' : 'translate-x-0'}`}></div>
@@ -284,7 +323,6 @@ export default function TarotApp() {
                     </div>
                 )}
 
-                {/* Info Modal */}
                 {showDeckInfo && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/20 backdrop-blur-sm p-6" onClick={() => setShowDeckInfo(false)}>
                         <div className="bg-white/90 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white max-w-xs animate-fade-in text-center" onClick={e => e.stopPropagation()}>
@@ -298,7 +336,6 @@ export default function TarotApp() {
                     </div>
                 )}
 
-                {/* Spread Select View */}
                 {gameState === 'spread_select' && (
                     <div className="w-full animate-fade-in flex flex-col items-center mt-16 md:mt-0">
                         <h2 className="text-lg md:text-xl font-serif text-slate-700 mb-8 md:mb-12 tracking-[0.2em] font-light">CHOOSE SPREAD</h2>
@@ -326,10 +363,8 @@ export default function TarotApp() {
                     </div>
                 )}
 
-                {/* Shuffling View - RESTORED ORBIT ANIMATION */}
                 {gameState === 'shuffling' && (
                     <div className="relative animate-fade-in flex flex-col items-center justify-center h-[60vh]">
-                        <p className="absolute text-xs font-serif text-slate-400 tracking-[0.4em] uppercase animate-pulse font-medium">Shuffling Fate</p>
                         <div className="relative w-32 h-48 md:w-40 md:h-60">
                             {[0,1,2,3,4].map(i => (
                                 <div key={i} className="absolute inset-0 rounded-xl overflow-hidden shadow-lg bg-white" style={{ animation: 'orbit 3s infinite ease-in-out', animationDelay: `${i*0.2}s`, opacity: 1 - i * 0.1 }}>
@@ -340,7 +375,6 @@ export default function TarotApp() {
                     </div>
                 )}
 
-                {/* Picking View */}
                 {gameState === 'picking' && (
                     <div className="flex flex-col items-center animate-fade-in w-full h-full justify-center mt-10 md:mt-0">
                         <h2 className="text-base md:text-lg font-serif text-slate-700 mb-2 tracking-widest">SELECT {selectedSpread.cardCount} CARDS</h2>
@@ -373,11 +407,9 @@ export default function TarotApp() {
                     </div>
                 )}
 
-                {/* Reading View */}
                 {gameState === 'reading' && (
                     <div className="w-full flex flex-col lg:flex-row gap-6 md:gap-12 animate-fade-in items-center lg:items-start justify-center h-full pt-16 md:pt-10 pb-6 md:pb-20">
                         
-                        {/* Left: Cards Layout */}
                         <div className="flex-1 w-full flex items-center justify-center min-h-[350px] md:min-h-[500px] relative">
                             <div className="absolute w-[300px] h-[300px] md:w-[500px] md:h-[500px] border border-indigo-100/50 rounded-full animate-spin-slow opacity-60 pointer-events-none"></div>
                             
@@ -394,12 +426,10 @@ export default function TarotApp() {
                             </div>
                         </div>
 
-                        {/* Right: Info Panel */}
                         <div className={`
                             w-full lg:w-[400px] bg-white/95 backdrop-blur-xl border border-white rounded-t-3xl lg:rounded-3xl p-6 md:p-8 shadow-[0_-10px_40px_-12px_rgba(0,0,0,0.1)] flex flex-col transition-all duration-500 relative z-30
                             ${showAiModal ? 'fixed bottom-0 left-0 right-0 h-[80vh] lg:h-[600px] lg:static' : 'h-auto min-h-[300px] md:min-h-[500px]'}
                         `}>
-                            {/* Drag Indicator (Mobile) */}
                             <div className="lg:hidden w-12 h-1 bg-slate-200 rounded-full mx-auto mb-4"></div>
                             
                             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-full blur-2xl -z-10 pointer-events-none"></div>
@@ -447,17 +477,27 @@ export default function TarotApp() {
                                         )}
                                     </div>
                                     
+                                    {/* Action Button - Updated Logic */}
                                     <button 
-                                        onClick={handleGenerateReading} 
-                                        disabled={!revealedCards.every(Boolean) || isAiLoading} 
+                                        onClick={handleActionClick} 
+                                        disabled={!revealedCards.every(Boolean) || (isAiLoading && !aiReading)} 
                                         className={`w-full py-3 md:py-4 rounded-xl flex items-center justify-center gap-3 mt-6 md:mt-auto transition-all duration-500 group border active:scale-95 ${revealedCards.every(Boolean) ? 'bg-slate-800 text-white hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-200 border-transparent' : 'bg-slate-50 text-slate-300 cursor-not-allowed border-slate-100'}`}
                                     >
-                                        {isAiLoading ? <Loader2 className="animate-spin" size={16}/> : <Sparkles size={16} className="group-hover:rotate-12 transition-transform"/>}
-                                        <span className="text-[10px] md:text-xs tracking-[0.2em] font-bold">{isAiLoading ? "CONNECTING..." : "REVEAL PROPHECY"}</span>
+                                        {isAiLoading ? (
+                                            <Loader2 className="animate-spin" size={16}/> 
+                                        ) : aiReading ? (
+                                            <Eye size={16} className="group-hover:scale-110 transition-transform"/>
+                                        ) : (
+                                            <Sparkles size={16} className="group-hover:rotate-12 transition-transform"/>
+                                        )}
+                                        
+                                        <span className="text-[10px] md:text-xs tracking-[0.2em] font-bold">
+                                            {isAiLoading ? "CONNECTING..." : aiReading ? "VIEW PROPHECY" : "REVEAL PROPHECY"}
+                                        </span>
                                     </button>
                                 </div>
                             ) : (
-                                <div className="flex-1 flex flex-col h-full animate-fade-in">
+                                <div className="flex-1 flex flex-col h-full animate-fade-in relative">
                                     <div className="flex justify-between items-center mb-4 md:mb-6 pb-4 border-b border-slate-100">
                                         <span className="text-[10px] md:text-xs font-serif text-indigo-600 tracking-[0.2em] uppercase font-bold">The Prophecy</span>
                                         <div className="flex gap-3">
@@ -471,11 +511,10 @@ export default function TarotApp() {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 relative">
                                         {isAiLoading ? (
-                                            <div className="h-full flex flex-col items-center justify-center gap-4 text-slate-400">
-                                                <Loader2 className="animate-spin text-indigo-300" size={32}/>
-                                                <p className="text-[10px] tracking-widest uppercase font-medium">Whispering to the stars...</p>
+                                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm">
+                                                <MysticCircleLoader />
                                             </div>
                                         ) : (
                                             <div className="prose prose-sm prose-slate max-w-none">
