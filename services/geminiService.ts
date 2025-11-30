@@ -40,6 +40,11 @@ const getAiClient = () => {
   // Clean the key (remove quotes if user accidentally added them in Vercel)
   const cleanKey = apiKey.replace(/['"]/g, '').trim();
   
+  // LOG THE KEY PREFIX FOR DEBUGGING (First 6 chars only)
+  if (cleanKey.length > 10) {
+      console.log(`GeminiService: Current Key starts with: ${cleanKey.substring(0, 8)}...`);
+  }
+  
   return new GoogleGenAI({ apiKey: cleanKey });
 };
 
