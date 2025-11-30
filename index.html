@@ -21,12 +21,14 @@
                         'float': 'float 6s ease-in-out infinite',
                         'pulse-slow': 'pulse 8s ease-in-out infinite',
                         'spin-slow': 'spin 20s linear infinite',
-                        'spin-reverse-slow': 'spin-reverse 25s linear infinite',
-                        'spin-ultra-slow': 'spin 60s linear infinite',
-                        'spin-reverse-ultra-slow': 'spin-reverse 50s linear infinite',
+                        'spin-slower': 'spin 60s linear infinite',
+                        'spin-ultra-slow': 'spin 120s linear infinite',
+                        'spin-reverse-slow': 'spin-reverse 30s linear infinite',
+                        'spin-reverse-slower': 'spin-reverse 80s linear infinite',
                         'fade-in': 'fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                         'pulse-glow': 'pulseGlow 4s ease-in-out infinite',
+                        'breathing': 'breathing 5s ease-in-out infinite',
                     },
                     keyframes: {
                         float: {
@@ -53,6 +55,10 @@
                         pulseGlow: {
                             '0%, 100%': { opacity: '0.6', filter: 'blur(8px)' },
                             '50%': { opacity: '1', filter: 'blur(12px)' },
+                        },
+                        breathing: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scale(0.98)' },
+                            '50%': { opacity: '0.8', transform: 'scale(1.02)' },
                         }
                     }
                 }
@@ -60,7 +66,8 @@
         }
     </script>
     <style>
-        body { margin: 0; padding: 0; overflow-x: hidden; background-color: #f3f4f8; -webkit-tap-highlight-color: transparent; }
+        /* Force hidden overflow-x to prevent scrollbars during animations */
+        body { margin: 0; padding: 0; overflow-x: hidden; width: 100vw; background-color: #f3f4f8; -webkit-tap-highlight-color: transparent; }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

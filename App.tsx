@@ -9,34 +9,137 @@ import { CardBack, CardFront } from './components/Card';
 import { getTarotReading, getSpeechFromText } from './services/geminiService';
 import { pcmToWav } from './utils';
 
-// --- Mystic Circle Loader (Elegant, Minimalist, Text-free) ---
-const MysticCircleLoader = () => {
+// --- Ambient Background Magic Circle ---
+// A massive, simplified version of the circle that creates atmosphere
+const AmbientMagicCircle = ({ active }: { active: boolean }) => {
     return (
-        <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
-            {/* Core Glow */}
-            <div className="absolute inset-0 bg-indigo-500/5 rounded-full blur-[60px] animate-pulse-slow"></div>
+        <div 
+            className={`fixed inset-0 pointer-events-none z-0 flex items-center justify-center transition-all duration-[3000ms] ease-in-out ${active ? 'opacity-20 scale-110' : 'opacity-[0.03] scale-100'}`}
+        >
+            <div className="w-[140vmax] h-[140vmax] animate-spin-ultra-slow text-indigo-900">
+                <svg viewBox="0 0 600 600" className="w-full h-full overflow-visible">
+                    {/* Giant Outer Ring */}
+                    <circle cx="300" cy="300" r="280" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="4 6" />
+                    <circle cx="300" cy="300" r="260" fill="none" stroke="currentColor" strokeWidth="0.5" />
+                    
+                    {/* Large Geometric Star */}
+                    <path d="M300 50 L360 200 L550 300 L360 400 L300 550 L240 400 L50 300 L240 200 Z" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.5" />
+                    
+                    {/* Inner Pattern */}
+                    <rect x="150" y="150" width="300" height="300" fill="none" stroke="currentColor" strokeWidth="0.5" transform="rotate(45 300 300)" opacity="0.3" />
+                </svg>
+            </div>
+        </div>
+    );
+};
 
-            {/* Layer 1: Outer Runes Ring - Ultra Slow Clockwise */}
-            <svg className="absolute w-full h-full animate-spin-ultra-slow text-indigo-200/50" viewBox="0 0 200 200">
-                <circle cx="100" cy="100" r="98" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="1 6" strokeLinecap="round" />
-                <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="0.2" />
-            </svg>
-
-            {/* Layer 2: Geometric Star - Slow Counter-Clockwise */}
-            <svg className="absolute w-[70%] h-[70%] animate-spin-reverse-slow text-violet-300/40 drop-shadow-[0_0_15px_rgba(167,139,250,0.3)]" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="0.3"/>
-                {/* 8-pointed star geometry */}
-                <path d="M50 2 L61 35 L98 35 L68 57 L79 91 L50 70 L21 91 L32 57 L2 35 L39 35 Z" fill="none" stroke="currentColor" strokeWidth="0.6"/>
-            </svg>
-
-            {/* Layer 3: Inner Sacred Geometry - Breathing */}
-            <div className="absolute w-[35%] h-[35%] animate-pulse-slow opacity-60">
-                <div className="absolute inset-0 border border-indigo-400/40 rotate-45 transform transition-transform duration-[10s]"></div>
-                <div className="absolute inset-0 border border-indigo-400/40 rotate-0"></div>
+// --- Advanced Mystic Magic Circle (Sakura Style - Complex) ---
+// Features: Nested circles, Planetary gears, High density geometry
+const SakuraMagicCircle = () => {
+    return (
+        <div className="relative w-80 h-80 md:w-[450px] md:h-[450px] flex items-center justify-center pointer-events-none select-none">
+            
+            {/* --- Layer 1: Base Runes (Slow Clockwise) --- */}
+            <div className="absolute inset-0 animate-spin-ultra-slow opacity-60">
+                <svg viewBox="0 0 400 400" className="w-full h-full text-indigo-400">
+                    <defs>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="2" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                    </defs>
+                    {/* Main Rings */}
+                    <circle cx="200" cy="200" r="195" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+                    <circle cx="200" cy="200" r="150" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.8" />
+                    
+                    {/* Complex Ticks */}
+                    {Array.from({length: 60}).map((_, i) => (
+                        <line key={i} x1="200" y1="5" x2="200" y2={i % 5 === 0 ? "25" : "15"} stroke="currentColor" strokeWidth={i % 5 === 0 ? "1" : "0.5"} transform={`rotate(${i * 6} 200 200)`} opacity={i % 5 === 0 ? "0.8" : "0.3"} />
+                    ))}
+                    
+                    {/* Cardinal Directions */}
+                    <path d="M200 10 L200 50 M200 350 L200 390 M10 200 L50 200 M350 200 L390 200" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
             </div>
 
-            {/* Center Core Light - The 'Eye' */}
-            <div className="absolute w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_20px_2px_rgba(255,255,255,0.9)] animate-pulse-glow"></div>
+            {/* --- Layer 2: Planetary Gears (Counter-Clockwise - Nested Circles) --- */}
+            <div className="absolute inset-[-10%] animate-spin-reverse-slower opacity-70">
+                <svg viewBox="0 0 500 500" className="w-full h-full text-indigo-300">
+                    {/* Four Satellite Circles at Cardinals */}
+                    {[0, 90, 180, 270].map((deg, i) => (
+                        <g key={i} transform={`rotate(${deg} 250 250) translate(0, -200)`}>
+                            {/* The Satellite Circle Itself */}
+                            <g className="animate-spin-slow origin-center">
+                                <circle cx="0" cy="0" r="35" fill="none" stroke="currentColor" strokeWidth="0.8" />
+                                <circle cx="0" cy="0" r="28" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="3 2" />
+                                {/* Inner Star of Satellite */}
+                                <path d="M0 -35 L0 35 M-35 0 L35 0" stroke="currentColor" strokeWidth="0.5" opacity="0.5" />
+                                <rect x="-15" y="-15" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="0.5" transform="rotate(45)" />
+                            </g>
+                        </g>
+                    ))}
+                </svg>
+            </div>
+
+            {/* --- Layer 3: Geometric Web (Counter-Clockwise Rotation) --- */}
+            <div className="absolute inset-[15%] animate-spin-reverse-slower opacity-80">
+                <svg viewBox="0 0 300 300" className="w-full h-full text-indigo-500">
+                    {/* Intersecting Squares */}
+                    <rect x="50" y="50" width="200" height="200" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.7" />
+                    <rect x="50" y="50" width="200" height="200" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.7" transform="rotate(45 150 150)" />
+                    
+                    {/* Connecting Hexagram Lines */}
+                    <path d="M150 20 L262 215 L38 215 Z" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.4" transform="rotate(0 150 150)" />
+                    <path d="M150 280 L262 85 L38 85 Z" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.4" transform="rotate(0 150 150)" />
+                    
+                    <circle cx="150" cy="150" r="80" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4 4" opacity="0.5" />
+                </svg>
+            </div>
+
+            {/* --- Layer 4: Celestial Orbit (Medium Clockwise Rotation) --- */}
+            <div className="absolute inset-[5%] animate-spin-slower">
+                <svg viewBox="0 0 360 360" className="w-full h-full text-indigo-400">
+                     {/* Sun (Right) */}
+                     <g transform="translate(290, 180) rotate(90)">
+                        <circle r="22" fill="white" fillOpacity="0.05" stroke="currentColor" strokeWidth="1" />
+                        <circle r="8" fill="currentColor" opacity="0.4" />
+                        {Array.from({length: 12}).map((_, i) => (
+                             <line key={i} x1="0" y1="-14" x2="0" y2="-26" stroke="currentColor" strokeWidth="0.8" transform={`rotate(${i * 30})`} />
+                        ))}
+                    </g>
+
+                    {/* Moon (Left) */}
+                    <g transform="translate(70, 180) rotate(-90)">
+                        <circle r="22" fill="white" fillOpacity="0.05" stroke="currentColor" strokeWidth="1" />
+                        <path d="M-8 -12 A 12 12 0 1 0 -8 12 A 10 10 0 1 1 -8 -12" fill="currentColor" opacity="0.4" />
+                        <circle r="28" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 4" />
+                    </g>
+                </svg>
+            </div>
+
+            {/* --- Layer 5: Central Star Core (No Dot, Just Geometry) --- */}
+            <div className="absolute inset-[25%] animate-breathing">
+                <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-600 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]">
+                    {/* Large Star */}
+                    <polygon 
+                        points="100,10 125,80 195,80 140,125 160,190 100,150 40,190 60,125 5,80 75,80" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="1.2" 
+                    />
+                    {/* Inner Star Details */}
+                    <polygon 
+                        points="100,10 125,80 195,80 140,125 160,190 100,150 40,190 60,125 5,80 75,80" 
+                        fill="currentColor" 
+                        fillOpacity="0.08"
+                        stroke="none"
+                        transform="scale(0.6) translate(66 66)"
+                    />
+                </svg>
+            </div>
+
+            {/* Background Ambient Glow (Breathing) */}
+            <div className="absolute w-2/3 h-2/3 bg-indigo-500/10 rounded-full blur-[60px] animate-pulse-slow"></div>
         </div>
     );
 };
@@ -271,6 +374,9 @@ export default function TarotApp() {
                 <div className="absolute top-[-10%] left-[10%] w-[120vw] md:w-[70vw] h-[120vw] md:h-[70vw] bg-indigo-100/40 rounded-full blur-[80px] md:blur-[120px] animate-pulse-slow mix-blend-multiply"></div>
                 <div className="absolute bottom-[-10%] right-[5%] w-[100vw] md:w-[60vw] h-[100vw] md:h-[60vw] bg-violet-100/40 rounded-full blur-[60px] md:blur-[100px] mix-blend-multiply"></div>
             </div>
+
+            {/* --- NEW: Ambient Background Circle (Always visible, pulses when active) --- */}
+            <AmbientMagicCircle active={isAiLoading} />
 
             <audio ref={audioRef} src={audioUrl || undefined} onEnded={() => setIsPlayingAudio(false)} className="hidden" />
             
@@ -513,8 +619,8 @@ export default function TarotApp() {
                                     </div>
                                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 relative">
                                         {isAiLoading ? (
-                                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm">
-                                                <MysticCircleLoader />
+                                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm overflow-hidden">
+                                                <SakuraMagicCircle />
                                             </div>
                                         ) : (
                                             <div className="prose prose-sm prose-slate max-w-none">
