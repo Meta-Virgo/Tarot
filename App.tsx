@@ -147,16 +147,20 @@ const SakuraMagicCircle = () => {
 // --- Reveal Magic Effect (Behind cards when flipped) ---
 const RevealMagicEffect = () => (
     <div className="absolute inset-[-60%] z-0 pointer-events-none animate-spin-slow opacity-0 animate-fade-in">
-        <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-300/40">
+        {/* INCREASED VISIBILITY: Darker text, thicker stroke, opacity bumped up */}
+        <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-500/70 drop-shadow-md">
              <defs>
                 <radialGradient id="fadeGrad" cx="50%" cy="50%" r="50%">
                     <stop offset="50%" stopColor="currentColor" stopOpacity="1"/>
                     <stop offset="100%" stopColor="currentColor" stopOpacity="0"/>
                 </radialGradient>
             </defs>
-            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#fadeGrad)" strokeWidth="0.5" />
-            <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 4" />
-            <path d="M100 20 L100 180 M20 100 L180 100" stroke="currentColor" strokeWidth="0.5" opacity="0.3" transform="rotate(45 100 100)" />
+            {/* Thicker strokes for better visibility */}
+            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#fadeGrad)" strokeWidth="2" />
+            <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 4" />
+            <path d="M100 20 L100 180 M20 100 L180 100" stroke="currentColor" strokeWidth="1.5" opacity="0.6" transform="rotate(45 100 100)" />
+            {/* Added inner ring for more visual weight */}
+            <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
         </svg>
     </div>
 );
@@ -357,7 +361,7 @@ export default function TarotApp() {
         return (
             <div key={index} style={{ gridArea }} className={`flex flex-col items-center group relative ${!isDiamond ? 'mx-auto' : ''}`}>
                 <p 
-                    className={`text-[9px] md:text-[10px] font-serif uppercase tracking-[0.2em] mb-2 md:mb-4 opacity-0 animate-fade-in-up font-medium transition-all duration-500 ${isActive ? 'text-indigo-600 font-bold translate-y-1' : 'text-slate-400'}`} 
+                    className={`text-[9px] md:text-[10px] font-serif uppercase tracking-[0.2em] mb-2 md:mb-4 opacity-0 animate-fade-in-up font-medium transition-all duration-500 ${isActive ? 'text-indigo-600 font-bold -translate-y-10 scale-105' : 'text-slate-400'}`} 
                     style={{ animationDelay: `${index * 0.15 + 0.5}s`, animationFillMode: 'forwards' }}
                 >
                     {position.name}
