@@ -41,7 +41,7 @@ const SakuraMagicCircle = () => {
             
             {/* --- Layer 1: Base Runes (Slow Clockwise) --- */}
             <div className="absolute inset-0 animate-spin-ultra-slow opacity-60">
-                <svg viewBox="0 0 400 400" className="w-full h-full text-indigo-400">
+                <svg viewBox="0 0 400 400" className="w-full h-full text-indigo-400 overflow-visible">
                     <defs>
                         <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                             <feGaussianBlur stdDeviation="2" result="blur" />
@@ -64,7 +64,7 @@ const SakuraMagicCircle = () => {
 
             {/* --- Layer 2: Planetary Gears (Counter-Clockwise - Nested Circles) --- */}
             <div className="absolute inset-[-10%] animate-spin-reverse-slower opacity-70">
-                <svg viewBox="0 0 500 500" className="w-full h-full text-indigo-300">
+                <svg viewBox="0 0 500 500" className="w-full h-full text-indigo-300 overflow-visible">
                     {/* Four Satellite Circles at Cardinals */}
                     {[0, 90, 180, 270].map((deg, i) => (
                         <g key={i} transform={`rotate(${deg} 250 250) translate(0, -200)`}>
@@ -83,7 +83,7 @@ const SakuraMagicCircle = () => {
 
             {/* --- Layer 3: Geometric Web (Counter-Clockwise Rotation) --- */}
             <div className="absolute inset-[15%] animate-spin-reverse-slower opacity-80">
-                <svg viewBox="0 0 300 300" className="w-full h-full text-indigo-500">
+                <svg viewBox="0 0 300 300" className="w-full h-full text-indigo-500 overflow-visible">
                     {/* Intersecting Squares */}
                     <rect x="50" y="50" width="200" height="200" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.7" />
                     <rect x="50" y="50" width="200" height="200" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.7" transform="rotate(45 150 150)" />
@@ -98,7 +98,7 @@ const SakuraMagicCircle = () => {
 
             {/* --- Layer 4: Celestial Orbit (Medium Clockwise Rotation) --- */}
             <div className="absolute inset-[5%] animate-spin-slower">
-                <svg viewBox="0 0 360 360" className="w-full h-full text-indigo-400">
+                <svg viewBox="0 0 360 360" className="w-full h-full text-indigo-400 overflow-visible">
                      {/* Sun (Right) */}
                      <g transform="translate(290, 180) rotate(90)">
                         <circle r="22" fill="white" fillOpacity="0.05" stroke="currentColor" strokeWidth="1" />
@@ -119,7 +119,7 @@ const SakuraMagicCircle = () => {
 
             {/* --- Layer 5: Central Star Core (No Dot, Just Geometry) --- */}
             <div className="absolute inset-[25%] animate-breathing">
-                <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-600 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)]">
+                <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-600 drop-shadow-[0_0_15px_rgba(99,102,241,0.6)] overflow-visible">
                     {/* Large Star */}
                     <polygon 
                         points="100,10 125,80 195,80 140,125 160,190 100,150 40,190 60,125 5,80 75,80" 
@@ -617,17 +617,23 @@ export default function TarotApp() {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2 relative">
-                                        {isAiLoading ? (
-                                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm overflow-hidden">
-                                                <SakuraMagicCircle />
+                                    <div className="flex-1 relative">
+                                        {/* Loading Overlay - Positioned absolutely relative to the container, ALLOWING OVERFLOW */}
+                                        {isAiLoading && (
+                                            <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
+                                                <div className="relative w-full h-full flex items-center justify-center overflow-visible bg-white/60 backdrop-blur-sm">
+                                                    <SakuraMagicCircle />
+                                                </div>
                                             </div>
-                                        ) : (
+                                        )}
+                                        
+                                        {/* Scrollable Content */}
+                                        <div className={`absolute inset-0 overflow-y-auto custom-scrollbar pr-2 -mr-2 ${isAiLoading ? 'opacity-0' : 'opacity-100'}`}>
                                             <div className="prose prose-sm prose-slate max-w-none">
                                                 <p className="text-xs md:text-sm text-slate-600 leading-7 md:leading-8 font-serif whitespace-pre-wrap font-light">{aiReading}</p>
                                                 <div className="mt-8 flex justify-center"><Sparkles className="text-indigo-200" size={16} /></div>
                                             </div>
-                                        )}
+                                        </div>
                                     </div>
                                 </div>
                             )}
