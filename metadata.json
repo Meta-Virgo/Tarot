@@ -1,0 +1,7 @@
+{
+  "name": "Mystic Tarot Oracle",
+  "description": "An immersive, 3D-animated Tarot reading application featuring Gemini 2.5 AI for personalized interpretations and text-to-speech guidance.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
