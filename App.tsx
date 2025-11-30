@@ -144,6 +144,23 @@ const SakuraMagicCircle = () => {
     );
 };
 
+// --- Reveal Magic Effect (Behind cards when flipped) ---
+const RevealMagicEffect = () => (
+    <div className="absolute inset-[-60%] z-0 pointer-events-none animate-spin-slow opacity-0 animate-fade-in">
+        <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-300/40">
+             <defs>
+                <radialGradient id="fadeGrad" cx="50%" cy="50%" r="50%">
+                    <stop offset="50%" stopColor="currentColor" stopOpacity="1"/>
+                    <stop offset="100%" stopColor="currentColor" stopOpacity="0"/>
+                </radialGradient>
+            </defs>
+            <circle cx="100" cy="100" r="90" fill="none" stroke="url(#fadeGrad)" strokeWidth="0.5" />
+            <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 4" />
+            <path d="M100 20 L100 180 M20 100 L180 100" stroke="currentColor" strokeWidth="0.5" opacity="0.3" transform="rotate(45 100 100)" />
+        </svg>
+    </div>
+);
+
 export default function TarotApp() {
     const [gameState, setGameState] = useState<GameState>('intro');
     const [selectedSpread, setSelectedSpread] = useState<Spread>(SPREADS[1]);
@@ -358,7 +375,10 @@ export default function TarotApp() {
                         ${!isActive && isAnyActive ? 'opacity-50 scale-95 blur-[0.5px] grayscale-[0.5]' : ''}
                     `}
                 >
-                    <div className={`relative w-full h-full transition-transform duration-1000 transform-style-3d ${revealed ? 'rotate-y-180' : ''}`}>
+                    {/* --- Reveal Magic Effect (Behind Card) --- */}
+                    {revealed && <RevealMagicEffect />}
+
+                    <div className={`relative w-full h-full transition-transform duration-1000 transform-style-3d ${revealed ? 'rotate-y-180' : ''} z-10`}>
                         <div className="absolute inset-0 backface-hidden"><CardBack /></div>
                         <div className="absolute inset-0 backface-hidden rotate-y-180"><CardFront card={card} isReversed={card.isReversed} /></div>
                     </div>
@@ -375,7 +395,7 @@ export default function TarotApp() {
                 <div className="absolute bottom-[-10%] right-[5%] w-[100vw] md:w-[60vw] h-[100vw] md:h-[60vw] bg-violet-100/40 rounded-full blur-[60px] md:blur-[100px] mix-blend-multiply"></div>
             </div>
 
-            {/* --- NEW: Ambient Background Circle (Always visible, pulses when active) --- */}
+            {/* --- Ambient Background Circle (Always visible, pulses when active) --- */}
             <AmbientMagicCircle active={isAiLoading} />
 
             <audio ref={audioRef} src={audioUrl || undefined} onEnded={() => setIsPlayingAudio(false)} className="hidden" />
@@ -549,26 +569,30 @@ export default function TarotApp() {
                                     
                                     <div className="flex-1 flex flex-col justify-center gap-4 md:gap-6">
                                         {currentReading !== null ? (
-                                            <div className="animate-fade-in-up">
-                                                <div className="flex items-start gap-4 mb-4 md:mb-6">
-                                                    <div className="p-2 md:p-3 bg-white border border-slate-100 rounded-2xl text-indigo-600 shadow-sm">
-                                                        {React.createElement(selectedCards[currentReading].icon, { size: 24, strokeWidth: 1.2 })}
+                                            <div className="animate-fade-in-up relative w-full h-full flex flex-col items-center">
+                                                {/* --- Watermark Background --- */}
+                                                {(() => {
+                                                    const Icon = selectedCards[currentReading].icon;
+                                                    return <Icon className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 text-slate-900 opacity-[0.02] -rotate-12 pointer-events-none" strokeWidth={0.5} />;
+                                                })()}
+                                                
+                                                {/* --- Centered Content --- */}
+                                                <div className="flex-1 flex flex-col items-center justify-center text-center z-10 w-full">
+                                                    <div className="text-[10px] md:text-xs text-indigo-400 uppercase tracking-[0.3em] font-bold mb-3 md:mb-4">
+                                                        {selectedSpread.positions[currentReading].name}
                                                     </div>
-                                                    <div>
-                                                        <div className="text-[9px] md:text-[10px] text-indigo-400 uppercase tracking-widest font-bold mb-1">
-                                                            {selectedSpread.positions[currentReading].name}
-                                                        </div>
-                                                        <div className="text-base md:text-lg font-serif text-slate-800 font-semibold">
-                                                            {selectedCards[currentReading].name.split(' ')[0]}
-                                                        </div>
-                                                        <span className="text-[9px] md:text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full mt-1 inline-block font-medium">
-                                                            {selectedCards[currentReading].isReversed ? "Reverse" : "Upright"}
-                                                        </span>
+                                                    
+                                                    <h2 className="text-2xl md:text-3xl font-serif text-slate-800 font-medium mb-2">
+                                                        {selectedCards[currentReading].name.split(' ')[0]}
+                                                    </h2>
+                                                    
+                                                    <div className={`px-3 py-1 rounded-full text-[10px] uppercase tracking-widest font-medium mb-6 md:mb-8 ${selectedCards[currentReading].isReversed ? "bg-rose-50 text-rose-500" : "bg-emerald-50 text-emerald-600"}`}>
+                                                        {selectedCards[currentReading].isReversed ? "Reversed" : "Upright"}
                                                     </div>
-                                                </div>
-                                                <div className="relative">
-                                                    <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-100 rounded-full"></div>
-                                                    <p className="text-xs md:text-sm text-slate-600 leading-relaxed pl-4 md:pl-5 font-light italic">
+                                                    
+                                                    <div className="w-12 h-[1px] bg-slate-200 mb-6 md:mb-8"></div>
+                                                    
+                                                    <p className="text-sm md:text-base text-slate-600 leading-relaxed font-light italic max-w-xs">
                                                         "{selectedCards[currentReading].isReversed ? selectedCards[currentReading].reversed : selectedCards[currentReading].upright}"
                                                     </p>
                                                 </div>
@@ -583,7 +607,7 @@ export default function TarotApp() {
                                         )}
                                     </div>
                                     
-                                    {/* Action Button - Updated Logic */}
+                                    {/* Action Button */}
                                     <button 
                                         onClick={handleActionClick} 
                                         disabled={!revealedCards.every(Boolean) || (isAiLoading && !aiReading)} 
