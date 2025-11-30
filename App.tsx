@@ -100,10 +100,7 @@ const SakuraMagicCircle = () => {
 // --- Reveal Magic Effect (Transient, Elegant, Subtle) ---
 const RevealMagicEffect = () => (
     <div className="absolute inset-[-40%] z-0 pointer-events-none animate-magic-reveal flex items-center justify-center">
-        {/* Subtle radial glow to enhance contrast without overpowering */}
-        <div className="absolute inset-[20%] bg-indigo-100/30 rounded-full blur-xl"></div>
-        
-        {/* Elegant, thin geometry with light glow */}
+        {/* Elegant, thin geometry with light glow - No background div */}
         <svg viewBox="0 0 200 200" className="w-full h-full text-indigo-400 drop-shadow-[0_0_8px_rgba(165,180,252,0.6)]">
              <defs>
                 <linearGradient id="magicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -291,7 +288,7 @@ export default function TarotApp() {
                     className={`
                         relative cursor-pointer perspective-1000 transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) ${cardClass}
                         ${isActive 
-                            ? 'z-30 scale-105 md:scale-110 shadow-[0_20px_50px_-12px_rgba(99,102,241,0.5)]' 
+                            ? 'z-30 scale-105 md:scale-110 shadow-2xl' 
                             : ''
                         }
                         ${!isActive && revealed && !isAnyActive ? 'hover:scale-105 hover:shadow-xl' : ''}
